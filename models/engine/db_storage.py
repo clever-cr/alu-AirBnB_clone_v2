@@ -29,28 +29,19 @@ class DBStorage:
             Base.metadata.drop_all(self._engine)
 
     def all(self, cls=None):
-        """Gets all objects depending on the class name"""
-
-        classes = {
-            'User': User, 'Place': Place,
-            'State': State, 'City': City, 'Amenity': Amenity,
-            'Review': Review
-        }
-        obj_dict = {}
-        if cls is not None and cls in classes:
-            class_objects = self.__session.query(classes[cls]).all()
-            for obj in class_objects:
-                key = obj.__class__.__name__ + "." + obj.id
-                obj_dict[key] = obj
-
+        """Returns a dictionary of all objects"""
+        classes = [User, State, City, Place, Amenity, Review]
+        new_dict = {}
         if cls is None:
-            for cls in classes:
-                class_objects = self.__session.query(classes[cls]).all()
-                for obj in class_objects:
-                    key = obj.__class__.__name__ + "." + obj.id
-                    obj_dict[key] = obj
-
-        return obj_dict
+            for c in classes:
+                for obj in self._session.query(c).all():
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+        else:
+            for obj in self._session.query(cls).all():
+                key = obj.__class__.__name__ + '.' + obj.id
+                new_dict[key] = obj
+        return new_dict
 
     def new(self, obj):
         """Adds a new object to the database"""
