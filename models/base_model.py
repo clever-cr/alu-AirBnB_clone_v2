@@ -20,14 +20,30 @@ class BaseModel:
         if not kwargs:
             from models import storage
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-        else:
-            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            del kwargs['__class__']
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
+        if kwargs:
+            if "id" not in kwargs:
+                kwargs["id"] = str(uuid.uuid4())
+            if "created_at" not in kwargs:
+                kwargs["created_at"] = datetime.utcnow().isoformat()
+            if "updated_at" not in kwargs:
+                kwargs["updated_at"] = datetime.utcnow().isoformat()
+
+            for key, value in kwargs.items():
+                if key == 'updated_at':
+                    kwargs[key] = datetime.strptime(
+                        value,
+                        '%Y-%m-%dT%H:%M:%S.%f')
+                if key == 'created_at':
+                    kwargs[key] = datetime.strptime(
+                        value,
+                        '%Y-%m-%dT%H:%M:%S.%f')
+                if hasattr(self, key) and key != '__class__':
+                    setattr(self, key, value)
+
+            if '__class__' in kwargs:
+                del kwargs['__class__']
             self.__dict__.update(kwargs)
 
     def __str__(self):
