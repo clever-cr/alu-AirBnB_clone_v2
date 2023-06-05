@@ -3,7 +3,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from models.base_model import BaseModel,Base
+from models.base_model import BaseModel, Base
 from models.user import User
 from models.state import State
 from models.city import City
@@ -17,7 +17,6 @@ class DBStorage:
     _engine = None
     _session = None
 
-
     def __init__(self):
         """Initialize the DBStorage class"""
         self._engine = create_engine('mysql+mysqldb://{}:{}@{}:3306/{}'
@@ -30,25 +29,28 @@ class DBStorage:
             Base.metadata.drop_all(self._engine)
 
     def all(self, cls=None):
-        """Returns a dictionary of all objects"""
-        new_dict = {}
+        """Gets all objects depending on the class name"""
+
+        classes = {
+            'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
+        obj_dict = {}
+        if cls is not None and cls in classes:
+            class_objects = self.__session.query(classes[cls]).all()
+            for obj in class_objects:
+                key = obj.__class__.__name__ + "." + obj.id
+                obj_dict[key] = obj
+
         if cls is None:
-            for obj in self._session.query(User).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-            for obj in self._session.query(State).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-            for obj in self._session.query(City).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-            for obj in self._session.query(Place).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-            for obj in self._session.query(Amenity).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-            for obj in self._session.query(Review).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-        else:
-            for obj in self._session.query(cls).all():
-                new_dict[obj.__class__.__name__ + '.' + obj.id] = obj
-        return new_dict
+            for cls in classes:
+                class_objects = self.__session.query(classes[cls]).all()
+                for obj in class_objects:
+                    key = obj.__class__.__name__ + "." + obj.id
+                    obj_dict[key] = obj
+
+        return obj_dict
 
     def new(self, obj):
         """Adds a new object to the database"""
