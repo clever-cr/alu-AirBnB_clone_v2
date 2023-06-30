@@ -10,7 +10,7 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
-@app.route('/cities_by_state', strict_slashes=False)
+@app.route('/cities_by_states', strict_slashes=False)
 def cities_route():
     """a template to display all states and their cities"""
     states_dict = storage.all(State)
