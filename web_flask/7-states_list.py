@@ -14,7 +14,7 @@ def number_odd_or_even():
     states_list = []
     for i in states.keys():
         states_list.append(states[i])
-    sorted_list = sorted(states_list, key=lambda x: x['name'])
+    sorted_list = sorted(states_list, key=lambda x: x.to_dict()['name'])
     return render_template('7-states_list.html',
                            states=sorted_list)
 
